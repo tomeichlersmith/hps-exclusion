@@ -90,7 +90,7 @@ def _generate_max_interval_samples(test_mu, n_trials_per_mu):
     return np.swapaxes(max_interval_by_k, 0, 1), test_mu, k_values, n_trials_per_mu
 
 
-class MaxIntervalSizeCDF:
+class OptimumIntervalStatisticCDF:
     """In-memory generation and lookup of the cumulative distribution function (CDF)
     of the maximum interval size partitioned by signal strength ($\mu$) and number of
     events within the interval ($k$).
@@ -115,10 +115,10 @@ class MaxIntervalSizeCDF:
         force_regen = False
     ):
         if cache:
-            if force_regen and MaxIntervalSizeCDF.__cache_location.is_file():
-                MaxIntervalSizeCDF.__cache_location.unlink()
-            if MaxIntervalSizeCDF.__cache_location.is_file():
-                with open(MaxIntervalSizeCDF.__cache_location, 'rb') as cache_file:
+            if force_regen and OptimumIntervalStatisticCDF.__cache_location.is_file():
+                OptimumIntervalStatisticCDF.__cache_location.unlink()
+            if OptimumIntervalStatisticCDF.__cache_location.is_file():
+                with open(OptimumIntervalStatisticCDF.__cache_location, 'rb') as cache_file:
                     self._table, self._mu_values, self._k_values, self._n_trials_per_mu = (
                         pickle.load(cache_file)
                     )
@@ -129,7 +129,7 @@ class MaxIntervalSizeCDF:
                         n_trials
                     )
                 )
-                with open(MaxIntervalSizeCDF.__cache_location, 'wb') as cache_file:
+                with open(OptimumIntervalStatisticCDF.__cache_location, 'wb') as cache_file:
                     pickle.dump(
                         (self._table, self._mu_values, self._k_values, self._n_trials_per_mu),
                         cache_file
@@ -159,8 +159,8 @@ class MaxIntervalSizeCDF:
             np.max(cumulants_with_edges[...,(k+1):]-cumulants_with_edges[...,:-1*(k+1)], axis=-1)
             for k in range(cumulants.shape[-1]+1)
         ])
+
     
-        
     def max_signal_strength_allowed(
         self,
         data_cumulants, *,
@@ -192,7 +192,7 @@ class MaxIntervalSizeCDF:
         
         # apply the largest interval algorithm and store the largest intervals in
         # an array indexed by k
-        max_interval_by_k = MaxIntervalSizeCDF._k_largest_intervals(data_cumulants)
+        max_interval_by_k = OptimumIntervalStatisticCDF._k_largest_intervals(data_cumulants)
         confidence = np.full(
             (
                 self._table.shape[0], # mu axis
