@@ -96,20 +96,20 @@ class OptimumIntervalMethod:
         max_interval_by_k = largest_intervals_by_k(data)
         confidence = np.full(
             (
-                self._table.shape[0], # mu axis
+                self.table.shape[0], # mu axis
                 *max_interval_by_k.shape, # k and data axes
             ),
             0.0
         )
-        for i_mu in range(self._table.shape[0]):
-            for k in range(min(self._table.shape[1], max_interval_by_k.shape[0])):
+        for i_mu in range(self.table.shape[0]):
+            for k in range(min(self.table.shape[1], max_interval_by_k.shape[0])):
                 confidence[i_mu,k,...] = np.sum(
                     np.less.outer(
-                        self._table[i_mu,k,:],
+                        self.table[i_mu,k,:],
                         max_interval_by_k[k]
                     ),
                     axis=0
-                ) / self._n_trials_per_mu
+                ) / self.n_trials_per_mu
         best_conf_over_k = np.max(confidence, axis=1)
         # select mu indices where this confidence is above the input threshold
         # set the value for the mu that obtain this threshold to 1 and the others to 0
@@ -122,5 +122,5 @@ class OptimumIntervalMethod:
         # to how we constructed the array
         min_i_mu_above = np.argmax(i_mu_above_selection, axis=0)
         # now lookup the min mu using our min_i_mu
-        min_mu_above = self._mu_values[min_i_mu_above]
+        min_mu_above = self.mu_values[min_i_mu_above]
         return min_mu_above
