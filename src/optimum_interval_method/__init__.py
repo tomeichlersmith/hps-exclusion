@@ -4,6 +4,10 @@ Yellin (2003) https://arxiv.org/abs/physics/0203002
 """
 
 
+import pathlib
+import pickle
+
+
 import numpy as np
 
 
@@ -54,7 +58,7 @@ def new(
         n_trials_per_mu = n
     )
     with open(__cache_location, 'wb') as cache_file:
-        pickle.dump(cache_file, oim)
+        pickle.dump(oim, cache_file)
     return oim
 
 
