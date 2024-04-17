@@ -1,8 +1,7 @@
 """module for generating, saving, and loading the max interval size LUT"""
 
 from dataclasses import dataclass
-import pathlib
-import pickle
+
 
 import numpy as np
 
