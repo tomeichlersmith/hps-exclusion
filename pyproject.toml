@@ -14,3 +14,12 @@ requires-python = ">=3.8"
 dependencies = [
   "numpy"
 ]
+
+[project.optional-dependencies]
+lint = [ "ruff" ]
+test = [ "pytest" ]
+dev = [ "optimum_interval_method[lint,test]" ]
+
+[tool.ruff]
+line-length = 99
+show-source = true
