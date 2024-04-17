@@ -7,92 +7,7 @@ import pickle
 import numpy as np
 
 
-def _generate_max_interval_samples(test_mu, n_trials_per_mu):
-    """Generate the table of trials given the np.array of signal strengths to test
-    and the number of trials to MC sample per signal strength
-
-    Parameters
-    ----------
-    test_mu: np.array, 1D
-        the signal strength values we should test
-    n_trials_per_mu: int
-        number of trials to test with
-
-    Returns
-    -------
-    tuple(3D np.array, 1D np.array, 1D np.array, int)
-        the table of trials whose indices are (i_mu, k, i_trial)
-        signal strengths represented indexed by (i_mu)
-        k values represented indexed by (k)
-        number of trials for each mu
-    """
-
-    # first sample the mu into number of events in each trial
-    # trial_counts[mu_index, trial_index]
-    trial_counts = np.swapaxes(
-        np.random.poisson(
-            test_mu,
-            size=(n_trials_per_mu,*test_mu.shape)
-        ),
-        0,
-        1
-    )
-
-    # generate uniformly random numbers for each trial in each mu
-    # us[event_index, mu_index, trial_index]
-    us = np.random.random(
-        size=(np.max(trial_counts), *test_mu.shape, n_trials_per_mu)
-    )
-    # this over-generates numbers so we set any entries whose index
-    # is greater than the number of counts equal to the signal value np.nan
-    #  (we use np.nan since any arithmetic with np.nan produces np.nan)
-    us[np.greater.outer(np.arange(us.shape[0]), trial_counts)] = np.nan
-    # sort the entries in each event along the event index axis
-    us = np.sort(us, axis=0)
-    # add the edges of the distribution for calculating the interval sizes
-    # uswe[event_index, mu_index, trial_index]
-    uswe = np.full(
-        (us.shape[0]+2, *us.shape[1:]),
-        np.nan
-    )
-    # set the contents within the edges to the random samples from before
-    uswe[1:-1,...] = us
-    # set the lower edge to be zero
-    uswe[0,...] = 0.0
-    # set the upper edge to 1.0
-    #   the index of the upper edge is found by checking where the event index
-    #   is equal to the number of entries in the trial (+1 since we added the lower edge)
-    uswe[np.equal.outer(np.arange(uswe.shape[0]), trial_counts+1)] = 1.0
-
-    max_possible_k = np.max(trial_counts)+1
-    k_values = np.arange(max_possible_k)
-    # calculate the maximum interval containing k events for each mu and each trial
-    # max_interval_by_k[k_index, mu_index, trial_index]
-    max_interval_by_k = np.full(
-        (max_possible_k, *uswe.shape[1:]),
-        np.nan
-    )
-    # this for loop is not expected to be a performance bottleneck since we expect the
-    # k to be limited to ~50
-    # we use np.nan to ignore all of the signal values we inserted above
-    for k in k_values:
-        # calculate interval differences with k entries in them
-        interval_differences = uswe[(k+1):,...]-uswe[:-(k+1),...]
-        # replace any NaNs leftover with -1.0 so they are eliminated by the np.max
-        interval_differences[np.isnan(interval_differences)] = -1.0
-        # find maximum interval over the event index
-        max_interval_by_k[k,...] = np.max(interval_differences, axis=0)
-
-    # if a maximum interval is -1.0 then that means there was no interval for that k
-    # for our purposes, we re-cast those values to a maximum interval of 1.0 since that
-    # effectively means there is no way to get an interval of any size for that k
-    max_interval_by_k[max_interval_by_k < 0.0] = 1.0
-
-    # swap k and mu indices in table for easier access later on
-    return np.swapaxes(max_interval_by_k, 0, 1), test_mu, k_values, n_trials_per_mu
-
-
-def _largest_intervals_by_k(data):
+def largest_intervals_by_k(data):
     """generate list of largest intervals containing k data points according to the input data
 
     The returned array has one additional axis in the zero'th position
@@ -122,7 +37,7 @@ def _largest_intervals_by_k(data):
 
 
 @dataclass
-class _OptimumIntervalMethod:
+class OptimumIntervalMethod:
     """Dataclass holding the necessary pre-sampled data and implementing the
     optimum interval method.
 
@@ -179,7 +94,7 @@ class _OptimumIntervalMethod:
         
         # apply the largest interval algorithm and store the largest intervals in
         # an array indexed by k
-        max_interval_by_k = _largest_intervals_by_k(data)
+        max_interval_by_k = largest_intervals_by_k(data)
         confidence = np.full(
             (
                 self._table.shape[0], # mu axis
@@ -210,73 +125,3 @@ class _OptimumIntervalMethod:
         # now lookup the min mu using our min_i_mu
         min_mu_above = self._mu_values[min_i_mu_above]
         return min_mu_above
-
-    
-def generate(
-        max_signal_strength = 20.0,
-        n_test_mu = 100,
-        n_trials = 1_000
-):
-    """Actively generate the table in memory, ignoring any cache
-
-    Parameters
-    ----------
-    max_signal_strength: float
-        maximum signal strength $\mu$ to have in the table
-    n_test_mu: int
-        number of signal strengths to have in table
-    n_trials: int
-        number of trials per signal strength to hold in the table
-
-    Returns
-    -------
-    _OptimumIntervalMethod
-        object that implements the OIM with the generated table
-    
-
-    See Also
-    --------
-    _generate_max_interval_samples
-        the function that implements the table generation
-    """
-    mu_values = np.linspace(0.0, max_signal_strength, n_test_mu)
-    table, mu, k, n = _generate_max_interval_samples(mu_values, n_trials)
-    return _OptimumIntervalMethod(
-        table = table,
-        mu_values = mu,
-        k_values = k,
-        n_trials_per_mu = n
-    )
-
-
-__cache_location = (
-  pathlib.Path(__file__).parent.resolve()
-  / 'max_interval_size_cdf_cache.pkl'
-)
-
-
-def save(oim: _OptimumIntervalMethod) -> None:
-    with open(__cache_location, 'wb') as cache_file:
-        pickle.dump(cache_file, oim)
-
-
-def load() -> _OptimumIntervalMethod:
-    with open(__cache_location, 'rb') as cache_file:
-        return pickle.load(cache_file)
-
-
-def get(*, cache = True, force_regen = False, **kwargs) -> _OptimumIntervalMethod:
-    if cache and force_regen:
-        oim = generate(**kwargs)
-        save(oim)
-        return oim
-    elif cache:
-        if __cache_location.is_file():
-            return load()
-        else:
-            oim = generate(**kwargs)
-            save(oim)
-            return oim
-    else:
-        return generate(**kwargs)
-
