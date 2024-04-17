@@ -122,7 +122,7 @@ def _largest_intervals_by_k(data):
 
 
 @dataclass
-class OptimumIntervalMethod:
+class _OptimumIntervalMethod:
     """Dataclass holding the necessary pre-sampled data and implementing the
     optimum interval method.
 
@@ -211,50 +211,72 @@ class OptimumIntervalMethod:
         min_mu_above = self._mu_values[min_i_mu_above]
         return min_mu_above
 
-
-def load_oim_table(
     
-):
-    
-    
-    __cache_location = (
-        pathlib.Path(__file__).parent.resolve()
-        / 'max_interval_size_cdf_cache.pkl'
-    )
-    
-    def __init__(
-        self,
+def generate(
         max_signal_strength = 20.0,
         n_test_mu = 100,
-        n_trials = 1_000,
-        cache = True,
-        force_regen = False
-    ):
-        if cache:
-            if force_regen and OptimumIntervalStatisticCDF.__cache_location.is_file():
-                OptimumIntervalStatisticCDF.__cache_location.unlink()
-            if OptimumIntervalStatisticCDF.__cache_location.is_file():
-                with open(OptimumIntervalStatisticCDF.__cache_location, 'rb') as cache_file:
-                    self._table, self._mu_values, self._k_values, self._n_trials_per_mu = (
-                        pickle.load(cache_file)
-                    )
-            else:
-                self._table, self._mu_values, self._k_values, self._n_trials_per_mu = (
-                    _generate_max_interval_samples(
-                        np.linspace(0.0, max_signal_strength, n_test_mu),
-                        n_trials
-                    )
-                )
-                with open(OptimumIntervalStatisticCDF.__cache_location, 'wb') as cache_file:
-                    pickle.dump(
-                        (self._table, self._mu_values, self._k_values, self._n_trials_per_mu),
-                        cache_file
-                    )
-        else:
-            self._table, self._mu_values, self._k_values, self._n_trials_per_mu = (
-                _generate_max_interval_samples(
-                    np.linspace(0.0, max_signal_strength, n_test_mu),
-                    n_trials
-                )
-            )
+        n_trials = 1_000
+):
+    """Actively generate the table in memory, ignoring any cache
+
+    Parameters
+    ----------
+    max_signal_strength: float
+        maximum signal strength $\mu$ to have in the table
+    n_test_mu: int
+        number of signal strengths to have in table
+    n_trials: int
+        number of trials per signal strength to hold in the table
+
+    Returns
+    -------
+    _OptimumIntervalMethod
+        object that implements the OIM with the generated table
     
+
+    See Also
+    --------
+    _generate_max_interval_samples
+        the function that implements the table generation
+    """
+    mu_values = np.linspace(0.0, max_signal_strength, n_test_mu)
+    table, mu, k, n = _generate_max_interval_samples(mu_values, n_trials)
+    return _OptimumIntervalMethod(
+        table = table,
+        mu_values = mu,
+        k_values = k,
+        n_trials_per_mu = n
+    )
+
+
+__cache_location = (
+  pathlib.Path(__file__).parent.resolve()
+  / 'max_interval_size_cdf_cache.pkl'
+)
+
+
+def save(oim: _OptimumIntervalMethod) -> None:
+    with open(__cache_location, 'wb') as cache_file:
+        pickle.dump(cache_file, oim)
+
+
+def load() -> _OptimumIntervalMethod:
+    with open(__cache_location, 'rb') as cache_file:
+        return pickle.load(cache_file)
+
+
+def get(*, cache = True, force_regen = False, **kwargs) -> _OptimumIntervalMethod:
+    if cache and force_regen:
+        oim = generate(**kwargs)
+        save(oim)
+        return oim
+    elif cache:
+        if __cache_location.is_file():
+            return load()
+        else:
+            oim = generate(**kwargs)
+            save(oim)
+            return oim
+    else:
+        return generate(**kwargs)
+
