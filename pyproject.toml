@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+https://packaging.python.org/en/latest/tutorials/packaging-projects/
+name = "optimum_interval_method"
+version = "0.0.2"
+description = "NumPy implementation of Optimum Interval Method from Yellin (2003)"
+readme = "README.md"
+requires-python = ">=3.7"
+dependencies = [
+  "numpy"
+]
