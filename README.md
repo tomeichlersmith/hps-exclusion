@@ -14,7 +14,9 @@ and branching ratios.
 
 ## Install
 I don't plan to publish this package to PyPI but you can still install it from source.
+For easier bug reporting, I would request that you install from a tag so that it is
+obvious what source code you are using.
 ```
-git clone https://github.com/tomeichlersmith/hps-exclusion.git
+git clone --branch <tag> https://github.com/tomeichlersmith/hps-exclusion.git
 pip install --user hps-exclusion/
 ```
