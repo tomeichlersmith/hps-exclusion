@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "exclusion"
+name = "hps-exclusion"
 version = "0.0.3"
 authors = [
   { name="Tom Eichlersmith", email="eichl008@umn.edu" }
@@ -20,7 +20,7 @@ dependencies = [
 [project.optional-dependencies]
 lint = [ "ruff" ]
 test = [ "pytest" ]
-dev = [ "exclusion[lint,test]" ]
+dev = [ "hps-exclusion[lint,test]" ]
 
 [tool.hatch.build.targets.wheel]
 packages = [
