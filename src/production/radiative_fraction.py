@@ -9,7 +9,8 @@ alic_2016_simps = polynomial(
 
 tom_2016_vanilla_rereach = polynomial(
     -2.12037976e-01, 1.58881667e+01, -3.23546649e+02, 3.03753504e+03,
-    -1.33484525e+04, 2.20606661e+04
+    -1.33484525e+04, 2.20606661e+04,
+    x_units = 1000.
 )
 """Tom produced with KF tracking on 2016 background files
 

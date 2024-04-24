@@ -16,8 +16,7 @@ def polynomial(
         coefficients in order for the power series polynomial
     x_units: float | int | None
         optionally change the units of x by dividing all x in
-        the series by this value and then multiplying the final
-        result by this value
+        the series by this value
 
     Returns
     -------
@@ -46,8 +45,8 @@ def polynomial(
         return _series_impl
     else:
         def _series_impl(x):
-            return x_units*sum([
+            return sum([
                 coefficient * (x/x_units)**power
-                for power, coeffiencent in enumerate(coefficients)
+                for power, coefficient in enumerate(coefficients)
             ])
         return _series_impl
