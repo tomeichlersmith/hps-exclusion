@@ -13,11 +13,9 @@ import awkward as ak
 
 def lut_estimate(
     reference,
-    mass_resolution_calculator,
     mass_range,
     *,
-    mass_window_width = 2.5,
-    mass_conversion = 1.0,
+    mass_window_width = 1.0,
     mass_branch = 'unc_vtx_mass'
 ):
     """construct a function that estimates the trident differential production
@@ -33,8 +31,9 @@ def lut_estimate(
         import matplotlib.pyplot
         masses = np.arange(40,200,5)
         tdp = trident_differential_production.estimate(
-            '/path/to/file.root', production.mass_resolution.alic_2016_simps,
-            masses, mass_conversion = mass_ratio_ap_to_vd)
+            '/path/to/file.root',
+            masses
+        )
         plt.plot(
             masses,
             [tdp_est(m) for m in masses]
@@ -45,12 +44,10 @@ def lut_estimate(
     reference: files inpput to [uproot.concatenate](https://uproot.readthedocs.io/en/latest/uproot.behaviors.TBranch.concatenate.html)
         Specification of ROOT TTree that you want to use as the reference for
         calculating the LUT
-    mass_resolution_calculator: Callable
-        function that estimates the mass resolution given an input mass
     mass_range: Iterable | list
-        range of production masses to sample for
+        range of production masses to sample for in MeV
     mass_window_width: float, optional
-        width of a mass window to sum over in units of mass resolution
+        width of a mass window to sum over in MeV
     mass_conversion: float, optional
         conversion between dark photon mass (whose production is proportional
         to trident differential production) and mass input to mass resolution
@@ -65,15 +62,10 @@ def lut_estimate(
             expressions = [ mass_branch ]
         )
         for mass in mass_range:
-            window_width = (
-                mass_window_width
-                *mass_resolution_calculator(mass_conversion*mass)
-                /mass_conversion
-            )
             dNdm_by_mass[mass] = ak.sum(
-                (bkgd_CR[mass_branch]*1000 > (mass - window_width/2))&
-                (bkgd_CR[mass_branch]*1000 < (mass + window_width/2))
-            )/window_width
+                (bkgd_CR[mass_branch]*1000 > (mass - mass_window_width/2))&
+                (bkgd_CR[mass_branch]*1000 < (mass + mass_window_width/2))
+            )/mass_window_width
         return dNdm_by_mass
 
     
