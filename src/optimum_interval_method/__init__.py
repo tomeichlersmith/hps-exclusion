@@ -106,7 +106,7 @@ def load_or_new(**kwargs) -> _oim.OptimumIntervalMethod:
         return new(**kwargs)
 
 
-def max_signal_strenght_allowed(*args, **kwargs):
+def max_signal_strength_allowed(*args, **kwargs):
     """Usability function to hold the loaded table for the user
 
     The user is required to already have a table in cache, so this
