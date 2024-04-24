@@ -16,13 +16,10 @@ these parameters to do the calculations
 
 """
 
+from . import _general
+
 import math
 class Parameters:
-
-    c = 3.00e11 #mm/s
-    hbar = 6.58e-22  # MeV*sec
-    electron_mass = 0.511 # MeV
-    alpha = 1.0 / 137.0
 
     def __init__(
         self, *,
@@ -68,14 +65,6 @@ class Parameters:
             m_ap = self.mass_ratio_Ap_to_Pid*m_pid
             m_vd = m_ap/self.mass_ratio_Ap_to_Vd
         return m_ap, m_vd, m_pid
-                
-    
-    def rate_Ap_ee_per_eps2(self, mass_ap):
-        r = Parameters.electron_mass/mass_ap
-        coeff1 = (Parameters.alpha)/3.0
-        coeff2 = (1.0 - 4.0*(r**2))**(0.5)
-        coeff3 = (1.0 + 2.0*(r**2))*mass_ap
-        return coeff1*coeff2*coeff3
 
 
     def rate_2pi(self, m_V):
@@ -93,21 +82,6 @@ class Parameters:
         m_Ap, m_V, m_pi = self._masses(m_V, vd=True)
         return alpha_dark / 6.0 * m_Ap * SimpEquations.f(r)
 
-    
-    @staticmethod
-    def Beta(x, y):
-        return (
-            1
-            + math.pow(y, 2)
-            - math.pow(x, 2)
-            - 2 * y
-        ) * (
-            1
-            + math.pow(y, 2)
-            - math.pow(x, 2)
-            + 2 * y
-        )
-
 
     def _rate_Ap_decay_per_Tv(self, m_V):
         """decay rate of V where the dependence on the outgoing topology
@@ -120,7 +94,7 @@ class Parameters:
             * math.pow(self.ratio_mPi_to_fPi, 4)
             * m_Ap
             * math.pow(
-                Parameters.Beta(
+                _general.Beta(
                     1/self.mass_ratio_Ap_to_Pid,
                     1/self.mass_ratio_Ap_to_Vd
                 ),
@@ -173,13 +147,9 @@ class Parameters:
         return (
             coeff
             * (m_V**2 / (m_Ap**2 - m_V**2))**2
-            * (1 - (4 * Parameters.electron_mass**2 / m_V**2))**0.5
-            * (1 + (2 * Parameters.electron_mass**2 / m_V**2))
+            * (1 - (4 * _general.electron_mass**2 / m_V**2))**0.5
+            * (1 + (2 * _general.electron_mass**2 / m_V**2))
             * m_V
             * (2 if rho else 1)
         )
 
-    
-    @staticmethod
-    def ctau(rate):
-        return (Parameters.c * Parameters.hbar / rate)
