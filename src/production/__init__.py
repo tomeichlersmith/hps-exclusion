@@ -15,15 +15,17 @@
 
 import numpy as np
 
+from ._trident_differential_production import TridentDifferentialProduction
+
 from . import mass_resolution
 from . import radiative_acceptance
 from . import radiative_fraction
-from . import trident_differential_production
+
 
 def from_calculators(
-    radiative_fraction,
-    trident_differential_production,
-    radiative_acceptance = None
+    rad_frac,
+    tdp,
+    rad_acc = None
 ):
     """Construct a function which takes an input dark photon mass
     and outputs the estimate total number of signal events using
@@ -32,12 +34,12 @@ def from_calculators(
 
     Parameters
     ----------
-    radiative_fraction: Callable
+    rad_frac: Callable
         function that calculates the radiative fraction given a dark photon mass
-    trident_differential_production: Callable
+    tdp: Callable
         function that calculates the trident differential production given
         a dark photon mass
-    radiative_acceptance: Callable, optional
+    rad_acc: Callable, optional
         function that calculates the radiative acceptance given a dark photon mass
         This factor will just be omitted if it is not given
     """
@@ -63,12 +65,23 @@ def from_calculators(
         estimate of signal event yield per epsilon^2
     """
 
-    if radiative_acceptance is None:
+    if isinstance(rad_frac,str):
+        if getattr(radiative_fraction, rad_frac, None) is None:
+            options = [
+                n
+                for n in dir(radiative_fraction)
+                if not n.startswith('_') and n != 'polynomial'
+            ]
+            raise ValueError(f'{rad_frac} is not one of the radiative_fraction options defined in this package ({options})')
+        rad_frac = getattr(radiative_fraction, rad_frac)
+
+
+    if rad_acc is None:
         def _impl(mass):
             return (
                 (3. * (137./2.) * np.pi)
-                * mass * radiative_fraction(mass)
-                * trident_differential_production(mass)
+                * mass * rad_frac(mass)
+                * tdp(mass)
             )
         _impl.__doc__ = doc
         return _impl
@@ -76,9 +89,9 @@ def from_calculators(
         def _impl(mass):
             return (
                 (3. * (137./2.) * np.pi)
-                * mass * radiative_fraction(mass)
-                * trident_differential_production(mass)
-                / radiative_acceptance(mass)
+                * mass * rad_frac(mass)
+                * tdp(mass)
+                / rad_acc(mass)
             )
         _impl.__doc__ = doc
         return _impl
