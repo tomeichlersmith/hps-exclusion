@@ -53,6 +53,16 @@ class TridentDifferentialProduction:
 
 
     @classmethod
+    def delete_cache(_cls):
+        """Delete the cache file, necessary when changing arguments to load
+
+        Hopefully, when I have time, I can implement a functional hashing algorithm
+        so that this re-creation of the cache file is done automatically.
+        """
+        _cache_location.unlink(missing_ok=True)
+
+
+    @classmethod
     def load(
         cls,
         reference,
@@ -60,8 +70,7 @@ class TridentDifferentialProduction:
         *,
         mass_window_width = 1.0,
         mass_branch = 'unc_vtx_mass',
-        mass_branch_to_MeV = 1000.,
-        cache = True
+        mass_branch_to_MeV = 1000.
     ):
         """estimate the trident differential production
         using the input reference data file to construct the dN/dm distribution
@@ -83,7 +92,7 @@ class TridentDifferentialProduction:
             conversion factor to multiply values of mass_branch to get them into units of MeV
             default is 1000.0
         """
-        if cache and _cache_location.is_file():
+        if _cache_location.is_file():
             with open(_cache_location, 'rb') as f:
                 return pickle.load(f)
         bkgd_CR = uproot.concatenate(
@@ -108,9 +117,8 @@ class TridentDifferentialProduction:
             bin_values = counts/widths,
         )
         
-        if cache:
-            with open(_cache_location, 'wb') as f:
-                pickle.dump(tdp, f)
+        with open(_cache_location, 'wb') as f:
+            pickle.dump(tdp, f)
         
         return tdp
 
