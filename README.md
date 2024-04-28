@@ -12,11 +12,13 @@ for a variety of dark photon masses.
 Implementation of different models functions for calculating decay rates
 and branching ratios.
 
-## Install
-I don't plan to publish this package to PyPI but you can still install it from source.
-For easier bug reporting, I would request that you install from a tag so that it is
+## Usage
+I don't plan to publish this package to PyPI and I don't think it is at a stage where
+it can be installed. Please just clone this directory into your workspace and load
+it from source.
+For easier bug reporting, I would request that you choose a tag so that it is
 obvious what source code you are using.
 ```
-git clone --branch <tag> https://github.com/tomeichlersmith/hps-exclusion.git
-pip install --user hps-exclusion/
+git clone --branch <tag> https://github.com/tomeichlersmith/hps-exclusion.git exclusion
+pip install -r exclusion/requirements.txt
 ```
