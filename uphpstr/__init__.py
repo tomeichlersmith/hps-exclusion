@@ -1,5 +1,6 @@
 import uproot
 import hist
+import numpy as np
 
 
 class hpstrHistFile :
