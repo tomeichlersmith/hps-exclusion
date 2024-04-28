@@ -1,11 +1,13 @@
 """various plotting helpers"""
 
+import numpy as np
+
+
 import matplotlib as mpl
 import mplhep
 import mplhep.error_estimation
 mpl.style.use(mplhep.style.ROOT)
 import matplotlib.pyplot as plt
-
 
 
 def poisson_interval_ignore_empty(sumw, sumw2):
@@ -34,10 +36,11 @@ def histplot(h, **kwargs):
 def show(
     ax = None,
     filename = None,
-    display = True
+    display = True,
+    exp_loc = 0
 ):
-    mplhep.label.lumitext(str(hpstrHistFile.lumi)+' $pb^{-1}$', ax = ax)
-    mplhep.label.exp_text('HPS','Internal','2016', ax=ax)
+    mplhep.label.lumitext('$10.7 pb^{-1}$', ax = ax)
+    mplhep.label.exp_text('HPS','Internal','2016', loc=exp_loc, ax=ax)
     if filename is not None:
         plt.savefig(
             filename,
