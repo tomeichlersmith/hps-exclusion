@@ -22,7 +22,8 @@ obvious what source code you are using.
 git clone --branch <tag> https://github.com/tomeichlersmith/hps-exclusion.git exclusion
 pip install -r exclusion/requirements.txt
 ```
-If you find yourself editing these files while using them within a notebook, the `autoreload`
+If you find yourself editing these files while using them within a notebook, the 
+[autoreload](https://ipython.readthedocs.io/en/stable/config/extensions/autoreload.html)
 extension is helpful for making the modules reload if the source files have changed.
 ```
 %load_ext autoreload
