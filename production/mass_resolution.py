@@ -9,3 +9,6 @@ tom_2016_vanilla_rereach = polynomial(9.10174583e-01, 2.94057744e-02, 8.63423108
 """Tom produced with KF trackingon 2016 displaced vanilla A' signal files
 
 copied in 4/24/2024"""
+
+matt_l1l1 = polynomial(0.9348, 0.05442, -5.784e-4, 5.852e-6, -1.724e-8)
+"""Eq 22 from Matt's 2016 Vertexing Note"""
