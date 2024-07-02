@@ -19,6 +19,7 @@ these parameters to do the calculations
 from . import _general
 
 import math
+
 class Parameters:
 
     def __init__(
@@ -143,7 +144,7 @@ class Parameters:
     def rate_Vd_decay_2l_per_eps2(self, m_V, rho):
         m_Ap, m_V, m_pid = self._masses(m_V, vd=True)
         f_pi = m_pid/self.ratio_mPi_to_fPi
-        coeff = (16 * math.pi * self.alpha_dark * Parameters.alpha * f_pi**2) / (3 * m_V**2)
+        coeff = (16 * math.pi * self.alpha_dark * _general.alpha * f_pi**2) / (3 * m_V**2)
         return (
             coeff
             * (m_V**2 / (m_Ap**2 - m_V**2))**2

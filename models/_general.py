@@ -12,6 +12,7 @@ alpha: float
     fine structure constant in the low energy limit
 """
 
+import math
 
 c = 3.00e11 #mm/s
 hbar = 6.58e-22  # MeV*sec
