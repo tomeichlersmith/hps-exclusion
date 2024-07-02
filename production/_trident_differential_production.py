@@ -70,7 +70,8 @@ class TridentDifferentialProduction:
         *,
         mass_window_width = 1.0,
         mass_branch = 'unc_vtx_mass',
-        mass_branch_to_MeV = 1000.
+        mass_branch_to_MeV = 1000.,
+        cr_cut = None,
     ):
         """estimate the trident differential production
         using the input reference data file to construct the dN/dm distribution
@@ -98,6 +99,7 @@ class TridentDifferentialProduction:
         bkgd_CR = uproot.concatenate(
             reference,
             expressions = [ mass_branch ],
+            cut = cr_cut,
             library = 'np'
         )
         # shifting by half window width so the bin centers are
