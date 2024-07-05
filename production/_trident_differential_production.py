@@ -125,6 +125,15 @@ class TridentDifferentialProduction:
         return tdp
 
 
+    @classmethod
+    def from_hist(cls, histogram):
+        widths = histogram.axes[0].widths
+        return cls(
+            bin_edges = histogram.axes[0].edges,
+            bin_values = histogram.values()/widths
+        )
+
+    
     def __call__(self, mass):
         """look up the differential production corresponding to the input dark photon mass"""
         bin_indices = np.digitize(mass, bins = self.bin_edges)-1
