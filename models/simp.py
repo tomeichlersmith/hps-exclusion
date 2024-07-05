@@ -141,7 +141,7 @@ class Parameters:
         return rate_func(m_V)/self.total_rate(m_V)
 
 
-    def rate_Vd_decay_2l_per_eps2(self, m_V, rho):
+    def rate_Vd_decay_2l_eps2(self, m_V, rho):
         m_Ap, m_V, m_pid = self._masses(m_V, vd=True)
         f_pi = m_pid/self.ratio_mPi_to_fPi
         coeff = (16 * math.pi * self.alpha_dark * _general.alpha * f_pi**2) / (3 * m_V**2)
