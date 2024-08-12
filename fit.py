@@ -49,19 +49,28 @@ def scaled_normal(x, mean, stdd, scale):
     return scale*scipy.stats.norm.pdf(x, mean, stdd)
 
 
-def fitnorm(histogram: hist.Hist):
+def fit_histogram(histogram: hist.Hist, f, **kwargs):
     x    = histogram.axes[0].centers
     y    = histogram.values()
-    yerr = np.sqrt(histogram.variances())
+    yerr = np.sqrt(
+        histogram.variances()
+        if histogram.variances() is not None else
+        histogram.values() # assume Poisson errors if no variances
+    )
 
     x = x[yerr > 0]
     y = y[yerr > 0]
     yerr = yerr[yerr > 0]
 
-    optimum, covariance = scipy.optimize.curve_fit(
-        scaled_normal,
+    return scipy.optimize.curve_fit(
+        f,
         x,
         y,
-        sigma = yerr
+        sigma = yerr,
+        absolute_sigma = True,
+        **kwargs
     )
-    return optimum
+
+
+def fitnorm(histogram: hist.Hist):
+    return fit_histogram(histogram, scaled_normal)[0]
