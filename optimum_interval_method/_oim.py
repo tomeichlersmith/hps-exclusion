@@ -1,6 +1,7 @@
 """module for generating, saving, and loading the max interval size LUT"""
 
 from dataclasses import dataclass
+import warnings
 
 
 import numpy as np
@@ -114,6 +115,15 @@ class OptimumIntervalMethod:
         # select mu indices where this confidence is above the input threshold
         # set the value for the mu that obtain this threshold to 1 and the others to 0
         i_mu_above_selection = np.where(best_conf_over_k > confidence_level, 1, 0)
+        # if we never go above the given confidence level, just return the maximum mu we tested
+        # after issuing a warning
+        if np.sum(i_mu_above_selection) == 0:
+            warnings.warn((
+                'No tested signal strength in table reached the desired confidence level.'
+                ' Either expand the table or lower the confidence level.'
+                ' Returning the maximum signal strength tested as a proxy.'
+            ))
+            return np.max(self.mu_values)
         # ASSUMPTION: the signal strength axis is ordered by mu
         #   this allows us to find the minimum index and
         #   then use that index to find the minimum mu
