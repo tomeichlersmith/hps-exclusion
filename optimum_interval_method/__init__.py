@@ -45,7 +45,8 @@ __cache_location = (
 )
 
 
-def new(
+def new(*,
+    mu_values = None,
     max_signal_strength = 20.0,
     n_test_mu = 100,
     n_trials = 1_000
@@ -59,6 +60,8 @@ def new(
         maximum signal strength $\mu$ to have in the table
     n_test_mu: int
         number of signal strengths to have in table
+    mu_values: np.array
+        override the linearly-spaced mu values with an array of your own
     n_trials: int
         number of trials per signal strength to hold in the table
 
@@ -74,7 +77,8 @@ def new(
         the function that implements the table generation
     """
     from . import _sample_generation
-    mu_values = np.linspace(0.0, max_signal_strength, n_test_mu)
+    if mu_values is None:
+        mu_values = np.linspace(0.0, max_signal_strength, n_test_mu)
     table, mu, k, n = _sample_generation.generate_max_interval_samples(mu_values, n_trials)
     oim = _oim.OptimumIntervalMethod(
         table = table,
