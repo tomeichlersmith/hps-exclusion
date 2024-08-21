@@ -27,7 +27,7 @@ def largest_intervals_by_k(data):
     """
     # assume the last axis is the one for the data of the events
     data_with_edges = np.full((*data.shape[:-1], data.shape[-1]+2), 0.)
-    data_with_edges[...,1:-1] = data
+    data_with_edges[...,1:-1] = np.sort(data, axis=-1) # need to sort data
     data_with_edges[...,-1] = 1.
     return np.array([
         np.max(data_with_edges[...,(k+1):]-data_with_edges[...,:-1*(k+1)], axis=-1)
