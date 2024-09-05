@@ -15,3 +15,9 @@ copied in 4/24/2024"""
 
 matt_l1l1 = polynomial(0.9348, 0.05442, -5.784e-4, 5.852e-6, -1.724e-8)
 """Eq 22 from Matt's 2016 Vertexing Note"""
+
+tom_2016_simps_l1l1 = polynomial(0.48400635, 0.04214241)
+"""Momentum smeared and rad-matched within Psum SR for L1L1 vertices, 2024/09/05"""
+
+tom_2016_simps_l1l2 = polynomial(0.81237597, 0.04217314)
+"""Momentum smeared and rad-matched within Psum SR for L1L2 vertices, 2024/09/05"""
