@@ -117,20 +117,25 @@ class OptimumIntervalMethod:
         i_mu_above_selection = np.where(best_conf_over_k > confidence_level, 1, 0)
         # if we never go above the given confidence level, just return the maximum mu we tested
         # after issuing a warning
-        if np.sum(i_mu_above_selection) == 0:
+        if np.any(np.sum(i_mu_above_selection, axis=0) == 0):
             warnings.warn((
-                'No tested signal strength in table reached the desired confidence level.'
+                'No tested signal strength in table reached the desired confidence level for some rows.'
                 ' Either expand the table or lower the confidence level.'
                 ' Returning the maximum signal strength tested as a proxy.'
             ))
-            return np.max(self.mu_values)
         # ASSUMPTION: the signal strength axis is ordered by mu
         #   this allows us to find the minimum index and
         #   then use that index to find the minimum mu
         # we use argmax to find the minimum index since argmax exits at the first value that
         # obtains the maximum which we know is the first value above the confidence_level due
         # to how we constructed the array
-        min_i_mu_above = np.argmax(i_mu_above_selection, axis=0)
+        # if the row doesn't have any mu above the confidence level, then we simply return
+        # the maximum (the last one in the list at index -1) as the warning above states
+        min_i_mu_above = np.where(
+            np.sum(i_mu_above_selection, axis=0)==0,
+            -1,
+            np.argmax(i_mu_above_selection, axis=0)
+        )
         # now lookup the min mu using our min_i_mu
         min_mu_above = self.mu_values[min_i_mu_above]
         return min_mu_above
